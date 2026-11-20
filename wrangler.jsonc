@@ -24,8 +24,8 @@
   "ai": { "binding": "AI" },
 
   // Stores generated designs so each repository keeps a stable look.
-  // Create with `npx wrangler kv namespace create DESIGNS` and paste the id here.
-  "kv_namespaces": [{ "binding": "DESIGNS", "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }],
+  // Wrangler creates the namespace on first deploy and remembers it.
+  "kv_namespaces": [{ "binding": "DESIGNS" }],
 
   "ratelimits": [
     { "name": "RENDER_LIMITER", "namespace_id": "4201", "simple": { "limit": 60, "period": 60 } },
