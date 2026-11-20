@@ -1,0 +1,28 @@
+{
+  "name": "repocard",
+  "version": "1.0.0",
+  "description": "AI-designed social preview images for GitHub repos, from the command line. Render one card, every repo of an account, or upload them all.",
+  "type": "module",
+  "license": "MIT",
+  "bin": { "repocard": "dist/repocard.mjs" },
+  "files": ["dist", "fonts", "README.md"],
+  "engines": { "node": ">=20" },
+  "repository": { "type": "git", "url": "git+https://github.com/nirholas/RepoCard.git", "directory": "packages/cli" },
+  "homepage": "https://github.com/nirholas/RepoCard#cli",
+  "bugs": { "url": "https://github.com/nirholas/RepoCard/issues" },
+  "keywords": ["github", "social-preview", "open-graph", "og-image", "readme", "cli", "llm"],
+  "scripts": {
+    "build": "node build.mjs",
+    "prepublishOnly": "node build.mjs"
+  },
+  "dependencies": {
+    "@cf-wasm/satori": "0.4.2",
+    "@resvg/resvg-wasm": "2.6.2"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.40.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright": { "optional": true }
+  }
+}
