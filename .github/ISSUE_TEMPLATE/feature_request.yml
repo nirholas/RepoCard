@@ -1,0 +1,13 @@
+name: Feature or design idea
+description: A new layout, palette, integration or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes:
+      label: Why, and who is it for?
