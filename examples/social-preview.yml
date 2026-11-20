@@ -1,0 +1,23 @@
+# Copy to .github/workflows/social-preview.yml in your repository.
+name: Social preview
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays: refresh star counts
+  push:
+    branches: [main]
+    paths: [README.md]
+
+permissions:
+  contents: write
+
+jobs:
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nirholas/RepoCard@v1
+        with:
+          readme-banner: true
+          # endpoint: https://your-repocard.example.com   # AI-designed cards from your RepoCard server

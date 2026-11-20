@@ -1,0 +1,135 @@
+name: RepoCard social preview
+description: Generate an AI-designed social preview image for a repository, commit it, and optionally show it as a README banner.
+author: nirholas
+branding:
+  icon: image
+  color: purple
+
+inputs:
+  repository:
+    description: Repository to design a card for (owner/repo).
+    default: ${{ github.repository }}
+  variant:
+    description: Which of the four design concepts to use (1-4).
+    default: '1'
+  layout:
+    description: Optional layout override (spotlight, split, editorial, terminal, poster, minimal).
+    default: ''
+  palette:
+    description: Optional palette override (e.g. midnight, paper, ocean).
+    default: ''
+  font:
+    description: Optional font override (modern, geometric, technical, editorial, friendly, expressive).
+    default: ''
+  path:
+    description: Where to write the PNG.
+    default: .github/social-preview.png
+  readme-banner:
+    description: Insert or update the card as a banner at the top of the README.
+    default: 'false'
+  readme-path:
+    description: README file to update when readme-banner is true.
+    default: README.md
+  commit:
+    description: Commit and push changes. Needs `permissions: contents: write`.
+    default: 'true'
+  commit-message:
+    description: Commit message.
+    default: 'chore: update social preview'
+  endpoint:
+    description: Optional RepoCard server URL for AI-designed cards. Without it, cards are rendered on the runner with deterministic designs.
+    default: ''
+  token:
+    description: Token for read-only GitHub API calls.
+    default: ${{ github.token }}
+
+outputs:
+  path:
+    description: Path of the generated PNG.
+    value: ${{ steps.render.outputs.path }}
+  changed:
+    description: '"true" when the image or README changed.'
+    value: ${{ steps.commit.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install RepoCard CLI
+      shell: bash
+      run: npm install --prefix "$GITHUB_ACTION_PATH/packages/cli" --omit=dev --no-audit --no-fund --loglevel=error
+
+    - name: Render social preview
+      id: render
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        REPOCARD_URL: ${{ inputs.endpoint }}
+        RC_REPO: ${{ inputs.repository }}
+        RC_VARIANT: ${{ inputs.variant }}
+        RC_LAYOUT: ${{ inputs.layout }}
+        RC_PALETTE: ${{ inputs.palette }}
+        RC_FONT: ${{ inputs.font }}
+        RC_PATH: ${{ inputs.path }}
+      run: |
+        set -euo pipefail
+        args=(card "$RC_REPO" --out "$RC_PATH" --variant "$RC_VARIANT")
+        [ -n "$RC_LAYOUT" ] && args+=(--layout "$RC_LAYOUT")
+        [ -n "$RC_PALETTE" ] && args+=(--palette "$RC_PALETTE")
+        [ -n "$RC_FONT" ] && args+=(--font "$RC_FONT")
+        node "$GITHUB_ACTION_PATH/packages/cli/dist/repocard.mjs" "${args[@]}"
+        size=$(wc -c < "$RC_PATH")
+        if [ "$size" -ge 1000000 ]; then echo "::warning::Image is ${size} bytes; GitHub's limit is 1 MB."; fi
+        echo "path=$RC_PATH" >> "$GITHUB_OUTPUT"
+
+    - name: Update README banner
+      if: inputs.readme-banner == 'true'
+      shell: bash
+      env:
+        RC_README: ${{ inputs.readme-path }}
+        RC_PATH: ${{ inputs.path }}
+        RC_REPO: ${{ inputs.repository }}
+      run: node "$GITHUB_ACTION_PATH/action/readme-banner.mjs" "$RC_README" "$RC_PATH" "$RC_REPO"
+
+    - name: Commit changes
+      id: commit
+      shell: bash
+      env:
+        RC_COMMIT: ${{ inputs.commit }}
+        RC_MESSAGE: ${{ inputs.commit-message }}
+        RC_PATH: ${{ inputs.path }}
+        RC_README: ${{ inputs.readme-path }}
+        RC_BANNER: ${{ inputs.readme-banner }}
+      run: |
+        set -euo pipefail
+        git add -- "$RC_PATH"
+        if [ "$RC_BANNER" = "true" ]; then git add -- "$RC_README"; fi
+        if git diff --cached --quiet; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "No changes."
+          exit 0
+        fi
+        echo "changed=true" >> "$GITHUB_OUTPUT"
+        if [ "$RC_COMMIT" != "true" ]; then echo "Changes staged; commit disabled."; exit 0; fi
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit -m "$RC_MESSAGE"
+        git push
+
+    - name: Summary
+      shell: bash
+      env:
+        RC_REPO: ${{ inputs.repository }}
+        RC_PATH: ${{ inputs.path }}
+      run: |
+        {
+          echo "### Social preview ready"
+          echo ""
+          echo "Saved to \`$RC_PATH\`. GitHub has no API for the social preview setting, so upload it once at"
+          echo "https://github.com/$RC_REPO/settings → **Social preview** → **Edit** → **Upload an image…**"
+          echo "(or run \`npx repocard apply $RC_REPO --yes\` locally)."
+        } >> "$GITHUB_STEP_SUMMARY"
