@@ -4,19 +4,128 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RepoCard: AI-designed social previews for GitHub repos</title>
-  <meta name="description" content="Paste a GitHub link. RepoCard reads your README, designs four original social preview cards, and renders crisp 1280×640 PNGs ready for GitHub.">
+  <meta name="description" content="Paste a GitHub link and get a social preview image that actually fits your project. Four AI-designed 1280×640 cards, free and open source.">
   <meta name="theme-color" content="#07080c">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="/fonts/inter-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="canonical" href="https://repocard.xyz/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="nirholas">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RepoCard">
+  <meta property="og:url" content="https://repocard.xyz/">
   <meta property="og:title" content="RepoCard: AI-designed social previews for GitHub repos">
-  <meta property="og:description" content="Paste a GitHub link and get a social preview image that actually fits your project.">
-  <meta property="og:image" content="/og.png">
+  <meta property="og:description" content="Paste a GitHub link and get a social preview image that actually fits your project. Four AI-designed 1280×640 cards, free and open source.">
+  <meta property="og:image" content="https://repocard.xyz/og.png">
   <meta property="og:image:width" content="1280">
   <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="RepoCard: AI-designed social previews for your GitHub repos">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RepoCard: AI-designed social previews for GitHub repos">
+  <meta name="twitter:description" content="Paste a GitHub link and get a social preview image that actually fits your project. Four AI-designed 1280×640 cards, free and open source.">
+  <meta name="twitter:image" content="https://repocard.xyz/og.png">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+  <link rel="api-catalog" href="/.well-known/api-catalog">
+  <link rel="author" href="/humans.txt" type="text/plain">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://repocard.xyz/#website",
+      "url": "https://repocard.xyz/",
+      "name": "RepoCard",
+      "description": "AI-designed social preview images for GitHub repositories.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://repocard.xyz/#app",
+      "name": "RepoCard",
+      "url": "https://repocard.xyz/",
+      "image": "https://repocard.xyz/og.png",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web, macOS, Linux, Windows",
+      "description": "Paste a GitHub repository link and get four AI-designed 1280x640 social preview images. Includes an HTTP API, MCP server for AI agents, CLI and GitHub Action.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "license": "https://opensource.org/licenses/MIT",
+      "isAccessibleForFree": true,
+      "codeRepository": "https://github.com/nirholas/RepoCard",
+      "downloadUrl": "https://www.npmjs.com/package/repocard",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Person",
+        "name": "nirholas",
+        "url": "https://github.com/nirholas"
+      },
+      "featureList": [
+        "AI-designed social preview images",
+        "Four design concepts per repository",
+        "Bulk export for whole GitHub accounts",
+        "MCP server for AI agents",
+        "CLI that uploads previews to every repository",
+        "GitHub Action"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://repocard.xyz/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why can't RepoCard set the image on GitHub for me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GitHub has no public API for the social preview, so every tool ends with an upload in the repository's settings. The RepoCard CLI automates that upload in your own browser session, so no credentials are shared with RepoCard."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is the social preview image shown?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Anywhere your repository link is shared: X, LinkedIn, Slack, Discord, iMessage, Facebook and more."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which AI designs the cards?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "By default an open model on Cloudflare Workers AI. Self-hosters can use any OpenAI-compatible endpoint. If the model is unavailable, RepoCard falls back to deterministic designs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does RepoCard work with private repositories?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. It only reads public repositories through the GitHub API and never asks for access to your account."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is RepoCard free and open source?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. RepoCard is MIT licensed and can be self-hosted on Cloudflare Workers."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+  <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
   <div class="glow" aria-hidden="true"></div>

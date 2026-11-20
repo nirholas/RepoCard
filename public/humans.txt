@@ -1,0 +1,10 @@
+/* TEAM */
+Creator: nirholas
+GitHub: https://github.com/nirholas
+
+/* SITE */
+Source: https://github.com/nirholas/RepoCard
+License: MIT
+Built with: Cloudflare Workers, Workers AI, Satori, resvg, TypeScript
+Fonts: Inter, Instrument Serif, JetBrains Mono, Space Grotesk, Sora, Bricolage Grotesque (SIL OFL)
+Emoji: Twemoji (CC-BY 4.0)
