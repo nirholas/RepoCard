@@ -4,7 +4,7 @@ node_modules/
 .env
 .env.*
 preview/
-dist/
+/dist/
 coverage/
 *.log
 .DS_Store
