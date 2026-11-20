@@ -13,6 +13,8 @@ await build({
   entryPoints: [join(here, 'src/bin.ts')],
   outfile: join(here, 'dist/repocard.mjs'),
   bundle: true,
+  // Fixed working directory so path comments in the bundle don't depend on where the build runs.
+  absWorkingDir: join(here, '../..'),
   platform: 'node',
   format: 'esm',
   target: 'node20',
