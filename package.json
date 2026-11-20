@@ -3,16 +3,36 @@
   "version": "1.0.0",
   "private": true,
   "description": "AI-designed social preview images for your GitHub repos. Reads your README, designs unique cards, renders crisp PNGs.",
-  "type": "module",
-  "license": "MIT",
+  "keywords": [
+    "github",
+    "social-preview",
+    "open-graph",
+    "og-image",
+    "social-card",
+    "readme",
+    "github-action",
+    "mcp",
+    "mcp-server",
+    "ai-agents",
+    "llm",
+    "workers-ai",
+    "cloudflare-workers",
+    "satori",
+    "image-generation",
+    "developer-tools",
+    "cli",
+    "seo"
+  ],
+  "homepage": "https://repocard.xyz",
+  "bugs": {
+    "url": "https://github.com/nirholas/RepoCard/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nirholas/RepoCard.git"
   },
-  "homepage": "https://github.com/nirholas/RepoCard#readme",
-  "bugs": {
-    "url": "https://github.com/nirholas/RepoCard/issues"
-  },
+  "license": "MIT",
+  "type": "module",
   "engines": {
     "node": ">=20"
   },
@@ -25,7 +45,8 @@
     "preview": "tsx scripts/preview.ts",
     "fonts:sync": "node scripts/sync-fonts.mjs",
     "cf-typegen": "wrangler types",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "llms:sync": "tsx scripts/sync-llms.ts"
   },
   "dependencies": {
     "@cf-wasm/satori": "^0.4.2",

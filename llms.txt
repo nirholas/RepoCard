@@ -1,0 +1,39 @@
+# RepoCard
+
+> AI-designed social preview images for GitHub repositories. Paste a repository link and get a 1280x640 PNG that fits the project. Read-only: RepoCard never writes to GitHub.
+
+## Use it
+
+- Image: GET https://repocard.xyz/card/{owner}/{repo}.png (add ?variant=1..4 for the four AI concepts)
+- SVG: GET https://repocard.xyz/card/{owner}/{repo}.svg
+- Concepts as JSON: GET https://repocard.xyz/api/v1/cards/{owner}/{repo}
+- Every repository of an account: GET https://repocard.xyz/api/v1/users/{owner}/repos
+- Design options: GET https://repocard.xyz/api/v1/options
+- OpenAPI: https://repocard.xyz/openapi.json
+
+## For AI agents
+
+- MCP server (Streamable HTTP): https://repocard.xyz/mcp
+  Tools: create_social_preview, get_design_concepts, list_account_cards, how_to_set_social_preview, get_design_options
+- Claude Code: claude mcp add --transport http repocard https://repocard.xyz/mcp
+
+## Setting the image on GitHub
+
+GitHub has no public API for the social preview. Upload the PNG at https://github.com/{owner}/{repo}/settings under "Social preview".
+The RepoCard CLI (npx repocard apply {owner}) automates the upload for many repositories in the user's own logged-in browser.
+
+## Docs
+
+- Guide: https://repocard.xyz/docs/
+- Source: https://github.com/nirholas/RepoCard
+
+## Codebase (for coding agents)
+
+- src/design/: design vocabulary (types.ts), palettes and contrast (palettes.ts, color.ts, validate.ts), LLM art director (ai.ts), deterministic fallback (fallback.ts)
+- src/render/: Satori layouts (layouts.ts, components.ts), native SVG backgrounds (background.ts), fonts (fonts.ts, font-files/), engine (engine.ts)
+- src/lib/: repo link parsing (repo-ref.ts), read-only GitHub client (github.ts), HTTP helpers
+- src/app.ts routes, src/service.ts caching and designs, src/mcp.ts MCP server, src/discovery.ts robots/sitemap/.well-known, src/index.ts Worker entry
+- public/: website (generator, bulk export, docs)
+- packages/cli/: the repocard npm package; action.yml: the GitHub Action
+- test/: Vitest suites (npm test), npm run typecheck, npm run preview -- owner/repo renders cards locally
+- Guidance for agents: AGENTS.md

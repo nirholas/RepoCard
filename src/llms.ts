@@ -128,3 +128,28 @@ Automation options:
 Source: https://github.com/nirholas/RepoCard (MIT)
 `;
 }
+
+/** Canonical public deployment, used for the copies committed to the repository. */
+export const REPO_ORIGIN = 'https://repocard.xyz';
+
+const CODEBASE = `
+## Codebase (for coding agents)
+
+- src/design/: design vocabulary (types.ts), palettes and contrast (palettes.ts, color.ts, validate.ts), LLM art director (ai.ts), deterministic fallback (fallback.ts)
+- src/render/: Satori layouts (layouts.ts, components.ts), native SVG backgrounds (background.ts), fonts (fonts.ts, font-files/), engine (engine.ts)
+- src/lib/: repo link parsing (repo-ref.ts), read-only GitHub client (github.ts), HTTP helpers
+- src/app.ts routes, src/service.ts caching and designs, src/mcp.ts MCP server, src/discovery.ts robots/sitemap/.well-known, src/index.ts Worker entry
+- public/: website (generator, bulk export, docs)
+- packages/cli/: the repocard npm package; action.yml: the GitHub Action
+- test/: Vitest suites (npm test), npm run typecheck, npm run preview -- owner/repo renders cards locally
+- Guidance for agents: AGENTS.md
+`;
+
+/** llms.txt committed at the repository root: the site summary plus a codebase map. */
+export function repoLlmsTxt(origin: string): string {
+  return llmsTxt(origin) + CODEBASE;
+}
+
+export function repoLlmsFullTxt(origin: string): string {
+  return llmsFullTxt(origin) + CODEBASE;
+}
