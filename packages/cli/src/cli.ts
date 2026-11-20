@@ -72,7 +72,7 @@ const require = createRequire(import.meta.url);
 
 function fail(message: string, code = 1): never {
   console.error(`\x1b[31merror\x1b[0m ${message}`);
-  process.exit(code);
+  return process.exit(code) as never;
 }
 
 function info(message: string) {
