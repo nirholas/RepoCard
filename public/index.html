@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RepoCard: AI-designed social previews for GitHub repos</title>
+  <meta name="description" content="Paste a GitHub link. RepoCard reads your README, designs four original social preview cards, and renders crisp 1280×640 PNGs ready for GitHub.">
+  <meta name="theme-color" content="#07080c">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/inter-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="RepoCard: AI-designed social previews for GitHub repos">
+  <meta property="og:description" content="Paste a GitHub link and get a social preview image that actually fits your project.">
+  <meta property="og:image" content="/og.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="RepoCard home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 15l3-3 2 2 3-4 2 3"/></svg></span>
+        RepoCard
+      </a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/bulk/" class="keep">All my repos</a>
+        <a href="/docs/#agents">For agents</a>
+        <a href="/docs/">Docs</a>
+        <a class="gh" href="https://github.com/nirholas/RepoCard" rel="noopener"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <span class="eyebrow"><span class="dot"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 6.9L21 12l-6.6 3.1L12 22l-2.4-6.9L3 12l6.6-3.1z"/></svg></span>Social previews, designed by AI</span>
+      <h1>Your repo deserves a better <em>first impression</em></h1>
+      <p class="lede">Paste a GitHub link. RepoCard reads the README, designs four original cards that fit the project, and renders crisp 1280×640 PNGs ready to upload.</p>
+
+      <form class="repo-form" id="repo-form" autocomplete="off" novalidate>
+        <label for="repo-input" class="sr-only">GitHub repository</label>
+        <div class="input-shell">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>
+          <input id="repo-input" name="repo" type="text" inputmode="url" spellcheck="false" placeholder="github.com/owner/repo" aria-describedby="form-error" required>
+          <button class="btn btn-primary" type="submit" id="submit-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 6.9L21 12l-6.6 3.1L12 22l-2.4-6.9L3 12l6.6-3.1z"/></svg>
+            Design my card
+          </button>
+        </div>
+        <div class="examples">
+          <span>Try</span>
+          <button type="button" class="chip" data-example="vercel/next.js">vercel/next.js</button>
+          <button type="button" class="chip" data-example="ggml-org/llama.cpp">ggml-org/llama.cpp</button>
+          <button type="button" class="chip" data-example="sindresorhus/awesome">sindresorhus/awesome</button>
+          <button type="button" class="chip" data-example="nirholas/three.ws">nirholas/three.ws</button>
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="studio wrap" id="studio" hidden aria-live="polite">
+      <div class="studio-head">
+        <div>
+          <h2><a id="repo-link" href="#" rel="noopener"></a><span class="badge" id="source-badge"></span></h2>
+          <p id="repo-desc"></p>
+        </div>
+        <button class="btn btn-sm" type="button" id="regenerate-btn" title="Ask the AI for four new concepts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+          New concepts
+        </button>
+      </div>
+
+      <div class="studio-grid">
+        <div>
+          <div class="panel">
+            <div class="preview-frame">
+              <div class="preview loading" id="preview">
+                <img id="preview-img" alt="Social preview" width="1280" height="640">
+                <div class="spinner" aria-hidden="true"><span></span></div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="button" id="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                Download PNG
+              </button>
+              <button class="btn" type="button" data-copy="url">Copy URL</button>
+              <button class="btn" type="button" data-copy="markdown">Copy Markdown</button>
+              <button class="btn" type="button" data-copy="html">Copy HTML</button>
+              <span class="spacer"></span>
+              <a class="btn btn-ghost" id="svg-link" href="#" target="_blank" rel="noopener">SVG</a>
+            </div>
+          </div>
+          <div class="concepts" id="concepts" role="group" aria-label="Design concepts"></div>
+        </div>
+
+        <aside class="side">
+          <div class="panel">
+            <h3>Why this design</h3>
+            <p class="rationale" id="rationale"></p>
+          </div>
+
+          <div class="panel">
+            <h3>Set it on GitHub <a class="btn btn-sm" id="settings-link" href="#" target="_blank" rel="noopener">Open settings ↗</a></h3>
+            <ol class="steps">
+              <li><span><b>Download</b> the PNG above.</span></li>
+              <li><span>Open your repo's <b>Settings</b> (needs admin access).</span></li>
+              <li><span>Under <b>Social preview</b>, click <b>Edit → Upload an image…</b></span></li>
+              <li><span>Pick the PNG. Done. Shared links now show your card.</span></li>
+            </ol>
+            <p class="note">GitHub has no API for this. To update many repos at once, use <a href="/bulk/">bulk export</a> or the <a href="/docs/#cli">CLI</a>.</p>
+          </div>
+
+          <div class="panel">
+            <h3>Fine-tune <button class="btn btn-ghost btn-sm" type="button" id="reset-btn">Reset</button></h3>
+            <div class="field">
+              <span class="label">Palette</span>
+              <div class="swatches" id="swatches" role="group" aria-label="Palette"></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="layout-select">Layout</label><select id="layout-select" data-param="layout"></select></div>
+              <div class="field"><label for="font-select">Type</label><select id="font-select" data-param="font"></select></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="bg-select">Background</label><select id="bg-select" data-param="background"></select></div>
+              <div class="field"><label for="mark-select">Mark</label><select id="mark-select" data-param="mark"></select></div>
+            </div>
+            <div class="field"><label for="tagline-input">Tagline</label><input type="text" id="tagline-input" data-param="tagline" maxlength="110"></div>
+            <div class="row">
+              <div class="field"><label for="title-input">Title</label><input type="text" id="title-input" data-param="title" maxlength="48"></div>
+              <div class="field"><label for="accent-input">Accent</label><div class="color-input"><input type="color" id="accent-input" value="#8ea6ff"><button class="btn btn-ghost btn-sm" type="button" id="accent-clear">Auto</button></div></div>
+            </div>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" id="stats-toggle" checked> Show stats</label>
+              <label class="toggle"><input type="checkbox" id="owner-toggle" checked> Show owner</label>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="block wrap" id="how">
+      <div class="section-head center">
+        <div class="kicker">How it works</div>
+        <h2>Designed for <em>your</em> project, not a template</h2>
+        <p>Other generators put every repo on the same card. RepoCard reads what your project is and art-directs a card to match.</p>
+      </div>
+      <div class="features">
+        <div class="panel feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+          <h3>Reads your repo</h3>
+          <p>Description, README, topics, languages and license. The README is treated as data, never as instructions.</p>
+        </div>
+        <div class="panel feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.9L21 12l-6.6 3.1L12 22l-2.4-6.9L3 12l6.6-3.1z"/></svg></div>
+          <h3>Designs four concepts</h3>
+          <p>An LLM picks layout, palette, type and a one-line tagline from a curated design system, so every result stays tasteful and legible.</p>
+        </div>
+        <div class="panel feature">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg></div>
+          <h3>Renders at the edge</h3>
+          <p>Code draws the final image on Cloudflare: real fonts, crisp text, no garbled AI lettering. Under 1&nbsp;MB, exactly 1280×640.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block wrap">
+      <div class="section-head center">
+        <div class="kicker">Gallery</div>
+        <h2>Six layouts, sixteen palettes, <em>endless</em> combinations</h2>
+      </div>
+      <div class="gallery" id="gallery">
+        <a href="/?repo=vercel/next.js"><img loading="lazy" alt="Social preview for vercel/next.js" data-src="/card/vercel/next.js.png?variant=1" width="1280" height="640"></a>
+        <a href="/?repo=ggml-org/llama.cpp"><img loading="lazy" alt="Social preview for ggml-org/llama.cpp" data-src="/card/ggml-org/llama.cpp.png?variant=3" width="1280" height="640"></a>
+        <a href="/?repo=sindresorhus/awesome"><img loading="lazy" alt="Social preview for sindresorhus/awesome" data-src="/card/sindresorhus/awesome.png?variant=4" width="1280" height="640"></a>
+        <a href="/?repo=nirholas/three.ws"><img loading="lazy" alt="Social preview for nirholas/three.ws" data-src="/card/nirholas/three.ws.png?variant=2" width="1280" height="640"></a>
+      </div>
+    </section>
+
+    <section class="block wrap" id="automate">
+      <div class="section-head">
+        <div class="kicker">Every repo, on autopilot</div>
+        <h2>One card or <em>all of them</em></h2>
+        <p>GitHub doesn't offer an API for social previews, so RepoCard gives you three ways to cover a whole account.</p>
+      </div>
+      <div class="split">
+        <div class="panel card">
+          <h3>Bulk export <span class="tag">Web</span></h3>
+          <p>Enter a user or organization and get a card for every public repo, with one-click settings links and a ZIP download.</p>
+          <a class="btn" href="/bulk/">Open bulk export</a>
+        </div>
+        <div class="panel card">
+          <h3>Auto-apply <span class="tag">CLI</span></h3>
+          <p>Uploads cards to every repo through your own logged-in browser. Dry run by default; nothing changes until you pass <code>--yes</code>.</p>
+          <pre class="code"><code><span class="c"># preview what would change</span>
+npx repocard apply <span class="k">your-username</span>
+<span class="c"># then apply it</span>
+npx repocard apply <span class="k">your-username</span> --yes</code></pre>
+        </div>
+        <div class="panel card">
+          <h3>Keep it fresh <span class="tag">GitHub Action</span></h3>
+          <p>Regenerates the card on a schedule, commits it to <code>.github/social-preview.png</code>, and can add it as a README banner.</p>
+          <pre class="code"><code><span class="k">- uses:</span> nirholas/RepoCard@v1
+  <span class="k">with:</span>
+    readme-banner: <span class="s">true</span></code></pre>
+        </div>
+        <div class="panel card" id="agents">
+          <h3>For AI agents <span class="tag">MCP</span></h3>
+          <p>Agents can design, render and explain setup through the MCP server, the REST API, or <a href="/llms.txt">llms.txt</a>.</p>
+          <pre class="code"><code>claude mcp add --transport http repocard <span class="s" data-origin>/mcp</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="block wrap" id="faq">
+      <div class="section-head">
+        <div class="kicker">FAQ</div>
+        <h2>Questions, answered</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Why can't RepoCard set the image on GitHub for me?</summary><p>GitHub has no public API for the social preview, so every tool, RepoCard included, ends with an upload in the repo's settings. The RepoCard CLI automates that upload in your own browser session, so no credentials are ever shared with RepoCard.</p></details>
+        <details><summary>Where is the image shown?</summary><p>Anywhere your repository link is shared: X, LinkedIn, Slack, Discord, iMessage, Facebook and more. GitHub search results don't show it.</p></details>
+        <details><summary>Which AI designs the cards?</summary><p>By default an open model on Cloudflare Workers AI. Self-hosters can use any OpenAI-compatible endpoint (Groq, OpenRouter, Gemini, Ollama). If the model is unavailable, RepoCard falls back to deterministic designs, so you always get a card.</p></details>
+        <details><summary>Does it work with private repositories?</summary><p>No. The hosted service only reads public repositories through the GitHub API and never asks for access to your account.</p></details>
+        <details><summary>Will my card change over time?</summary><p>The design is generated once and stored, so it stays the same. Star and fork counts refresh every few hours. Click "New concepts" whenever you want fresh designs.</p></details>
+        <details><summary>Can I host my own?</summary><p>Yes. RepoCard is MIT licensed and deploys to Cloudflare Workers in a few minutes. See <a href="/docs/#self-host">self-hosting</a>.</p></details>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="panel cta">
+        <h2>Give every repo a <em>proper</em> card</h2>
+        <p>Free, open source, and ready in seconds.</p>
+        <a class="btn btn-primary" href="#top" id="cta-btn">Design my card</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>RepoCard · MIT licensed · Not affiliated with GitHub</span>
+      <nav aria-label="Footer">
+        <a href="/docs/">Docs</a>
+        <a href="/docs/#api">API</a>
+        <a href="/docs/#agents">MCP</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/llms.txt">llms.txt</a>
+        <a href="https://github.com/nirholas/RepoCard" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/common.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

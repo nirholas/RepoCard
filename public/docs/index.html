@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docs · RepoCard</title>
+  <meta name="description" content="How to set a GitHub social preview, automate it for every repository, use the RepoCard API and MCP server, and self-host on Cloudflare.">
+  <meta name="theme-color" content="#07080c">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <meta property="og:title" content="RepoCard docs">
+  <meta property="og:image" content="/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <div class="glow glow-dim" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="RepoCard home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 15l3-3 2 2 3-4 2 3"/></svg></span>
+        RepoCard
+      </a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/bulk/" class="keep">All my repos</a>
+        <a href="/docs/#agents">For agents</a>
+        <a href="/docs/" aria-current="page">Docs</a>
+        <a class="gh" href="https://github.com/nirholas/RepoCard" rel="noopener"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap docs">
+    <aside aria-label="Documentation">
+      <span class="group">Start</span>
+      <a href="#quick-start">Quick start</a>
+      <a href="#github">Add it to GitHub</a>
+      <span class="group">Automate</span>
+      <a href="#bulk">Bulk export</a>
+      <a href="#cli">CLI</a>
+      <a href="#action">GitHub Action</a>
+      <span class="group">Build</span>
+      <a href="#api">HTTP API</a>
+      <a href="#agents">AI agents (MCP)</a>
+      <a href="#design">Design system</a>
+      <span class="group">Operate</span>
+      <a href="#self-host">Self-hosting</a>
+      <a href="#privacy">Privacy &amp; security</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+    </aside>
+
+    <article class="prose">
+      <h1>Documentation</h1>
+      <p>RepoCard designs social preview images for GitHub repositories. The social preview is the image shown when someone shares your repository link on X, LinkedIn, Slack, Discord, iMessage and elsewhere.</p>
+
+      <h2 id="quick-start">Quick start</h2>
+      <ol>
+        <li>Paste a repository link on the <a href="/">home page</a>.</li>
+        <li>Pick one of the four concepts and fine-tune it if you like.</li>
+        <li>Click <strong>Download PNG</strong>, then follow <a href="#github">Add it to GitHub</a>.</li>
+      </ol>
+      <p>Every card is also a stable URL you can embed anywhere:</p>
+      <pre class="code"><code><span data-origin>/card/OWNER/REPO.png</span>
+<span data-origin>/card/OWNER/REPO.png?variant=2&amp;palette=paper</span></code></pre>
+
+      <h2 id="github">Add it to GitHub</h2>
+      <p>You need admin access to the repository.</p>
+      <ol>
+        <li>Open the repository on GitHub and click <strong>Settings</strong> (or go to <code>https://github.com/OWNER/REPO/settings</code>).</li>
+        <li>On the <strong>General</strong> page, find <strong>Social preview</strong> near the top.</li>
+        <li>Click <strong>Edit</strong> → <strong>Upload an image…</strong> and choose the PNG.</li>
+        <li>That's it. GitHub saves it immediately.</li>
+      </ol>
+      <p>GitHub recommends 1280×640 pixels and under 1&nbsp;MB, which is exactly what RepoCard produces. To remove a custom image later, use <strong>Edit → Remove image</strong>.</p>
+      <div class="callout"><strong>Why there is no "set it for me" button:</strong> GitHub has no public API for the social preview. The API can read it (GraphQL <code>openGraphImageUrl</code>, <code>usesCustomOpenGraphImage</code>) but not change it. The <a href="#cli">CLI</a> automates the upload in your own browser instead.</div>
+      <p><strong>Seeing an old image?</strong> X, LinkedIn, Slack and Facebook cache link previews for days. Most offer a way to refresh a URL, for example LinkedIn's Post Inspector.</p>
+
+      <h2 id="bulk">Bulk export</h2>
+      <p>The <a href="/bulk/">bulk page</a> lists every public repository of a user or organization with its card, a <strong>Settings ↗</strong> link for each, and <strong>Download all (ZIP)</strong>. The ZIP contains one PNG per repository plus an <code>index.html</code> with every settings link.</p>
+      <p><strong>AI designs</strong> asks the model to design each repository (a few seconds each, then cached). <strong>Fast</strong> uses stored designs if they exist, otherwise deterministic ones, and never calls the model.</p>
+
+      <h2 id="cli">CLI</h2>
+      <p>The <code>repocard</code> CLI needs Node.js 20 or later. It renders cards on your machine with the same engine as the website, so it works without any server.</p>
+      <pre class="code"><code><span class="c"># one repository</span>
+npx repocard card vercel/next.js
+
+<span class="c"># every public repository of an account, into ./social-previews</span>
+npx repocard bulk your-username
+
+<span class="c"># which repositories already have a custom preview</span>
+npx repocard status your-username</code></pre>
+
+      <h3>Upload to every repository automatically</h3>
+      <p><code>repocard apply</code> does the upload GitHub doesn't offer an API for. It opens a real browser window, you sign in to GitHub yourself, and it uploads each card through the normal settings page.</p>
+      <pre class="code"><code><span class="c"># 1. install the browser automation library once</span>
+npm install -g playwright &amp;&amp; npx playwright install chromium
+
+<span class="c"># 2. dry run: renders cards and shows the plan, uploads nothing</span>
+npx repocard apply your-username
+
+<span class="c"># 3. upload</span>
+npx repocard apply your-username --yes</code></pre>
+      <ul>
+        <li><strong>Safe by default.</strong> Without <code>--yes</code> nothing is uploaded. Repositories that already have a custom preview are kept unless you pass <code>--overwrite</code>.</li>
+        <li><strong>Your session stays local.</strong> You sign in inside the browser window. RepoCard never sees your password or cookies. The profile is stored at <code>~/.repocard/browser</code> (change it with <code>--profile</code>).</li>
+        <li><strong>Verified.</strong> With a GitHub token (<code>GITHUB_TOKEN</code>, <code>GH_TOKEN</code>, or <code>gh auth login</code>), RepoCard checks through the API that each upload took effect and skips repositories where you lack admin access.</li>
+        <li><strong>Best effort.</strong> It drives GitHub's web UI, so a redesign of the settings page can break it. When an upload fails, RepoCard prints the settings link and the PNG path so you can finish by hand.</li>
+      </ul>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Option</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>-o, --out</code></td><td>Output file (<code>card</code>) or directory (<code>bulk</code>).</td></tr>
+          <tr><td><code>-v, --variant</code></td><td>Design concept 1-4. Default 1.</td></tr>
+          <tr><td><code>--layout --palette --font --tagline</code></td><td>Override parts of the design.</td></tr>
+          <tr><td><code>--endpoint</code></td><td>Use a RepoCard server (AI designs) instead of rendering locally. Also <code>REPOCARD_URL</code>.</td></tr>
+          <tr><td><code>--forks --archived</code></td><td>Include forks or archived repositories.</td></tr>
+          <tr><td><code>--yes</code></td><td><code>apply</code>: actually upload.</td></tr>
+          <tr><td><code>--overwrite</code></td><td><code>apply</code>: replace existing custom previews.</td></tr>
+          <tr><td><code>--headless</code></td><td><code>apply</code>: no window (after signing in once).</td></tr>
+          <tr><td><code>--delay</code></td><td><code>apply</code>: milliseconds between repositories. Default 2000.</td></tr>
+        </tbody>
+      </table></div>
+      <p>For AI designs without a server, set <code>LLM_BASE_URL</code>, <code>LLM_API_KEY</code> and <code>LLM_MODEL</code> to any OpenAI-compatible endpoint (Groq, OpenRouter, Gemini, Together, Ollama).</p>
+
+      <h2 id="action">GitHub Action</h2>
+      <p>Keeps a fresh card committed in your repository and can show it as a README banner. Add <code>.github/workflows/social-preview.yml</code>:</p>
+      <pre class="code"><code><span class="k">name:</span> Social preview
+<span class="k">on:</span>
+  workflow_dispatch:
+  schedule:
+    - cron: <span class="s">'0 6 * * 1'</span>
+<span class="k">permissions:</span>
+  contents: write
+<span class="k">jobs:</span>
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nirholas/RepoCard@v1
+        with:
+          readme-banner: <span class="s">true</span></code></pre>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Input</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>variant</code></td><td><code>1</code></td><td>Design concept 1-4.</td></tr>
+          <tr><td><code>layout</code>, <code>palette</code>, <code>font</code></td><td></td><td>Optional overrides.</td></tr>
+          <tr><td><code>path</code></td><td><code>.github/social-preview.png</code></td><td>Where to write the image.</td></tr>
+          <tr><td><code>readme-banner</code></td><td><code>false</code></td><td>Insert or update a banner between <code>&lt;!-- repocard:start --&gt;</code> markers.</td></tr>
+          <tr><td><code>commit</code></td><td><code>true</code></td><td>Commit and push changes.</td></tr>
+          <tr><td><code>endpoint</code></td><td></td><td>RepoCard server for AI designs. Without it, cards render on the runner.</td></tr>
+        </tbody>
+      </table></div>
+      <p>The Action can't set the social preview itself (no API). It writes the image and a job summary with the settings link; upload once, or run <code>repocard apply</code>.</p>
+
+      <h2 id="api">HTTP API</h2>
+      <p>No key required. All endpoints are read-only and send CORS headers. Machine-readable spec: <a href="/openapi.json">/openapi.json</a>.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Endpoint</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /card/{owner}/{repo}.png</code></td><td>1280×640 PNG. Errors return a PNG explaining the problem, with the matching status code.</td></tr>
+          <tr><td><code>GET /card/{owner}/{repo}.svg</code></td><td>The same card as SVG.</td></tr>
+          <tr><td><code>GET /api/v1/cards/{owner}/{repo}</code></td><td>The four concepts with specs, PNG/SVG URLs, Markdown, HTML and setup steps.</td></tr>
+          <tr><td><code>POST /api/v1/cards</code></td><td>Same, from <code>{"repo": "any GitHub URL", "refresh": true}</code>. <code>refresh</code> asks for new concepts.</td></tr>
+          <tr><td><code>GET /api/v1/users/{owner}/repos</code></td><td>Public repositories with card and settings URLs. <code>?forks=1&amp;archived=1&amp;limit=300</code>.</td></tr>
+          <tr><td><code>GET /api/v1/options</code></td><td>Every layout, palette, font, background and query parameter.</td></tr>
+          <tr><td><code>POST /mcp</code></td><td>MCP server for AI agents.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Card parameters</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Parameter</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td><code>variant</code></td><td>1-4 (default 1)</td></tr>
+          <tr><td><code>layout</code></td><td>spotlight, split, editorial, terminal, poster, minimal</td></tr>
+          <tr><td><code>palette</code></td><td>midnight, obsidian, aurora, ember, nebula, ocean, forest, terminal, crimson, gold, paper, snow, mint, blush, sand, sky</td></tr>
+          <tr><td><code>font</code></td><td>modern, geometric, technical, editorial, friendly, expressive</td></tr>
+          <tr><td><code>background</code></td><td>aurora, grid, dots, diagonal, rings, solid</td></tr>
+          <tr><td><code>mark</code>, <code>emoji</code></td><td>avatar, monogram, emoji, none; <code>emoji=🚀</code> with <code>mark=emoji</code></td></tr>
+          <tr><td><code>accent</code></td><td>Hex color without <code>#</code>, adjusted automatically if illegible</td></tr>
+          <tr><td><code>title</code>, <code>tagline</code>, <code>chips</code></td><td>Text overrides; chips are comma-separated (max 3)</td></tr>
+          <tr><td><code>stats=0</code>, <code>owner=0</code></td><td>Hide stars/forks/language/license or the owner</td></tr>
+          <tr><td><code>mode=fast</code></td><td>Never call the AI; use stored or deterministic designs</td></tr>
+        </tbody>
+      </table></div>
+      <pre class="code"><code>curl -o card.png "<span data-origin>/card/vercel/next.js.png?variant=2</span>"
+curl "<span data-origin>/api/v1/cards/vercel/next.js</span>"</code></pre>
+      <p>Images are cached at the edge for several hours. Limits apply to new renders per IP address; cached images are unaffected.</p>
+
+      <h2 id="agents">AI agents (MCP)</h2>
+      <p>RepoCard runs a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server over Streamable HTTP at <code data-origin>/mcp</code>. No authentication is needed.</p>
+      <h3>Claude Code</h3>
+      <pre class="code"><code>claude mcp add --transport http repocard <span data-origin>/mcp</span></code></pre>
+      <h3>Cursor (<code>.cursor/mcp.json</code>)</h3>
+      <pre class="code"><code>{ "mcpServers": { "repocard": { "url": "<span data-origin>/mcp</span>" } } }</code></pre>
+      <h3>VS Code (<code>.vscode/mcp.json</code>)</h3>
+      <pre class="code"><code>{ "servers": { "repocard": { "type": "http", "url": "<span data-origin>/mcp</span>" } } }</code></pre>
+      <h3>Claude Desktop and other stdio clients</h3>
+      <pre class="code"><code>{ "mcpServers": { "repocard": { "command": "npx", "args": ["-y", "mcp-remote", "<span data-origin>/mcp</span>"] } } }</code></pre>
+      <h3>Tools</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>create_social_preview</code></td><td>Designs and renders a card. Returns the PNG inline, its URL, the design, and setup steps. Accepts the same overrides as the image URL.</td></tr>
+          <tr><td><code>get_design_concepts</code></td><td>All four concepts with rationale and URLs. <code>refresh</code> asks for new ones.</td></tr>
+          <tr><td><code>list_account_cards</code></td><td>Every public repository of an account with card and settings URLs.</td></tr>
+          <tr><td><code>how_to_set_social_preview</code></td><td>Step-by-step instructions and automation options.</td></tr>
+          <tr><td><code>get_design_options</code></td><td>The full design vocabulary.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Agents that prefer plain HTTP can read <a href="/llms.txt">/llms.txt</a> and <a href="/openapi.json">/openapi.json</a>.</p>
+
+      <h2 id="design">Design system</h2>
+      <p>The model never writes free-form markup. It picks from a curated vocabulary, and code renders the result:</p>
+      <ul>
+        <li><strong>Layouts:</strong> spotlight (centered), split (text and a visual panel), editorial (magazine serif), terminal (code window), poster (huge type), minimal (quiet and precise).</li>
+        <li><strong>Palettes:</strong> ten dark and six light schemes. Every palette meets WCAG contrast (7:1 for text, 4.5:1 for secondary text), and custom brand accents are adjusted until they're legible.</li>
+        <li><strong>Type:</strong> Inter, Space Grotesk, JetBrains Mono, Instrument Serif, Sora and Bricolage Grotesque, all SIL Open Font License. Emoji use Twemoji, and non-Latin scripts load matching Noto fonts on demand.</li>
+        <li><strong>Copy:</strong> the model writes a one-line tagline and up to three keywords. Text is length-limited and cleaned before rendering.</li>
+      </ul>
+      <p>If the model is unavailable, slow, or returns something unusable, RepoCard falls back to deterministic designs derived from the repository's language and metadata, so a request never fails because of the AI.</p>
+
+      <h2 id="self-host">Self-hosting</h2>
+      <p>RepoCard is a single Cloudflare Worker with static assets.</p>
+      <div class="callout"><strong>Plan requirement:</strong> rendering takes roughly 50-300&nbsp;ms of CPU per new image, so you need the <strong>Workers Paid</strong> plan (the Free plan allows 10&nbsp;ms per request). Cached images cost almost nothing.</div>
+      <pre class="code"><code>git clone https://github.com/nirholas/RepoCard &amp;&amp; cd RepoCard
+npm install
+npx wrangler login
+npx wrangler kv namespace create DESIGNS   <span class="c"># paste the id into wrangler.jsonc</span>
+npx wrangler secret put GITHUB_TOKEN       <span class="c"># fine-grained token, public repositories, read-only</span>
+npm run deploy</code></pre>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Setting</th><th>Kind</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>AI</code></td><td>Binding</td><td>Workers AI. Remove to use deterministic designs only.</td></tr>
+          <tr><td><code>DESIGNS</code></td><td>KV binding</td><td>Stores designs so each repository keeps a stable look.</td></tr>
+          <tr><td><code>RENDER_LIMITER</code>, <code>AI_LIMITER</code></td><td>Rate limit bindings</td><td>Per-IP limits for new renders (60/min) and AI generations (10/min).</td></tr>
+          <tr><td><code>GITHUB_TOKEN</code></td><td>Secret</td><td>Raises GitHub API limits from 60 to 5,000 requests/hour. Strongly recommended.</td></tr>
+          <tr><td><code>AI_PROVIDER</code></td><td>Variable</td><td><code>workers-ai</code> (default), <code>openai-compatible</code>, or <code>none</code>.</td></tr>
+          <tr><td><code>AI_MODEL</code></td><td>Variable</td><td>Workers AI model. Default <code>@cf/meta/llama-3.3-70b-instruct-fp8-fast</code>.</td></tr>
+          <tr><td><code>LLM_BASE_URL</code>, <code>LLM_MODEL</code>, <code>LLM_API_KEY</code></td><td>Variables / secret</td><td>Any OpenAI-compatible endpoint when <code>AI_PROVIDER=openai-compatible</code>.</td></tr>
+          <tr><td><code>PUBLIC_URL</code></td><td>Variable</td><td>Canonical origin used in returned URLs. Defaults to the request origin.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Use a custom domain for production: the Workers Cache API, which caches rendered images, doesn't run on <code>*.workers.dev</code>.</p>
+
+      <h2 id="privacy">Privacy &amp; security</h2>
+      <ul>
+        <li>RepoCard only reads public repository data through the GitHub API. It never asks for access to your account and never writes to GitHub.</li>
+        <li>It stores the generated design (layout, palette and text) per repository. It doesn't store IP addresses beyond the transient rate limiter.</li>
+        <li>README content is passed to the model as untrusted data. Model output is restricted to a fixed vocabulary and short, cleaned text.</li>
+        <li>Only GitHub's avatar host can be fetched for images. SVG responses carry a restrictive Content-Security-Policy.</li>
+        <li>Report vulnerabilities privately; see <a href="https://github.com/nirholas/RepoCard/blob/main/SECURITY.md">SECURITY.md</a>.</li>
+      </ul>
+
+      <h2 id="troubleshooting">Troubleshooting</h2>
+      <h3>"Repository not found"</h3>
+      <p>The repository is private, renamed, or misspelled. RepoCard only supports public repositories.</p>
+      <h3>"Too many requests"</h3>
+      <p>New renders are limited per IP address. Wait a minute; cached cards keep working.</p>
+      <h3>The badge says "Designed from metadata"</h3>
+      <p>The AI was busy or unavailable, so RepoCard used deterministic designs. Click <strong>New concepts</strong> later to try the AI again.</p>
+      <h3><code>repocard apply</code> can't find the upload control</h3>
+      <p>GitHub may have changed its settings page. Upload the printed PNG by hand and <a href="https://github.com/nirholas/RepoCard/issues">open an issue</a>.</p>
+    </article>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>RepoCard · MIT licensed · Not affiliated with GitHub</span>
+      <nav aria-label="Footer"><a href="/">Generator</a><a href="/bulk/">Bulk</a><a href="/openapi.json">OpenAPI</a><a href="/llms.txt">llms.txt</a><a href="https://github.com/nirholas/RepoCard" rel="noopener">GitHub</a></nav>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/common.js" defer></script>
+</body>
+</html>
