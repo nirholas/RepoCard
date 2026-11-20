@@ -16,6 +16,12 @@ vocabulary, and renders PNGs with Satori and resvg. `public/` is the website,
 - `npm run dev`: local Worker
 - `npm run preview -- owner/repo`: render cards to `./preview` to look at them
 - `npm run build --prefix packages/cli`: rebuild the CLI bundle (commit `packages/cli/dist`)
+- `npm run llms:sync`: regenerate the root `llms.txt` and `llms-full.txt` after editing `src/llms.ts`
+
+## Machine-readable entry points
+
+- `llms.txt` / `llms-full.txt` (repo root, and served at https://repocard.xyz)
+- https://repocard.xyz/openapi.json, https://repocard.xyz/.well-known/mcp.json, https://repocard.xyz/.well-known/api-catalog
 
 ## Conventions
 

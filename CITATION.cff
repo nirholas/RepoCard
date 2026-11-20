@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: If you use RepoCard in your work, please cite it as below.
+title: "RepoCard: AI-designed social preview images for GitHub repositories"
+type: software
+authors:
+  - alias: nirholas
+repository-code: https://github.com/nirholas/RepoCard
+url: https://repocard.xyz
+license: MIT
+version: 1.0.0
+date-released: 2026-11-20
+keywords:
+  - github
+  - social preview
+  - open graph
+  - image generation
+  - large language models
+  - model context protocol
+abstract: >-
+  RepoCard reads a GitHub repository's metadata and README, asks a language model to choose four
+  design concepts from a closed design vocabulary, and renders 1280x640 social preview images with
+  Satori and resvg on Cloudflare Workers. It ships a web app, HTTP API, MCP server, CLI and GitHub Action.
