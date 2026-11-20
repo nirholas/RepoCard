@@ -3,7 +3,14 @@
   "name": "repocard",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
-  "workers_dev": true,
+  // Served only on the custom domain; the workers.dev address is disabled.
+  // Self-hosting? Replace these routes with your domain, or remove them and set workers_dev to true.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "repocard.xyz", "custom_domain": true },
+    { "pattern": "www.repocard.xyz", "custom_domain": true }
+  ],
   "observability": { "enabled": true },
 
   // Rendering takes roughly 50-300 ms of CPU, so RepoCard needs the Workers
@@ -33,6 +40,7 @@
   ],
 
   "vars": {
+    "PUBLIC_URL": "https://repocard.xyz",
     "AI_PROVIDER": "workers-ai",
     "AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
   }
