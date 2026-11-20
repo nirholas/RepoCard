@@ -10,9 +10,9 @@
 </p>
 
 <p align="center">
-  <a href="https://repocard.example.com">Website</a> ·
-  <a href="https://repocard.example.com/bulk/">Bulk export</a> ·
-  <a href="https://repocard.example.com/docs/">Docs</a> ·
+  <a href="https://repocard.xyz">Website</a> ·
+  <a href="https://repocard.xyz/bulk/">Bulk export</a> ·
+  <a href="https://repocard.xyz/docs/">Docs</a> ·
   <a href="#for-ai-agents">MCP server</a> ·
   <a href="https://www.npmjs.com/package/repocard">CLI</a>
 </p>
@@ -37,13 +37,13 @@ The **social preview** is the image people see when your repository link is shar
 
 ## Quick start
 
-**On the web:** open [repocard.example.com](https://repocard.example.com), paste a repository link, pick a concept, and click **Download PNG**.
+**On the web:** open [repocard.xyz](https://repocard.xyz), paste a repository link, pick a concept, and click **Download PNG**.
 
 **As a URL** (embed anywhere):
 
 ```
-https://repocard.example.com/card/OWNER/REPO.png
-https://repocard.example.com/card/OWNER/REPO.png?variant=2&palette=paper
+https://repocard.xyz/card/OWNER/REPO.png
+https://repocard.xyz/card/OWNER/REPO.png?variant=2&palette=paper
 ```
 
 **From the terminal:**
@@ -64,7 +64,7 @@ GitHub has **no public API** for the social preview: it can be read (`openGraphI
 
 | | What it does |
 |---|---|
-| **[Bulk export](https://repocard.example.com/bulk/)** | Cards for every public repo of a user or org, one-click settings links, ZIP download with an index of links. |
+| **[Bulk export](https://repocard.xyz/bulk/)** | Cards for every public repo of a user or org, one-click settings links, ZIP download with an index of links. |
 | **`repocard apply`** | Uploads each card through your **own** logged-in browser (Playwright). Dry run by default, keeps existing custom previews unless `--overwrite`, and verifies each upload through the API. |
 | **GitHub Action** | Regenerates `.github/social-preview.png` on a schedule and can keep it as a README banner. |
 
@@ -107,14 +107,14 @@ Inputs: `variant`, `layout`, `palette`, `font`, `path` (default `.github/social-
 RepoCard is an MCP server (Streamable HTTP, no auth):
 
 ```bash
-claude mcp add --transport http repocard https://repocard.example.com/mcp
+claude mcp add --transport http repocard https://repocard.xyz/mcp
 ```
 
 ```jsonc
 // Cursor (.cursor/mcp.json)
-{ "mcpServers": { "repocard": { "url": "https://repocard.example.com/mcp" } } }
+{ "mcpServers": { "repocard": { "url": "https://repocard.xyz/mcp" } } }
 // VS Code (.vscode/mcp.json)
-{ "servers": { "repocard": { "type": "http", "url": "https://repocard.example.com/mcp" } } }
+{ "servers": { "repocard": { "type": "http", "url": "https://repocard.xyz/mcp" } } }
 ```
 
 | Tool | Purpose |
@@ -125,7 +125,7 @@ claude mcp add --transport http repocard https://repocard.example.com/mcp
 | `how_to_set_social_preview` | Step-by-step instructions and automation options. |
 | `get_design_options` | The full design vocabulary. |
 
-Plain HTTP agents can use [`/llms.txt`](https://repocard.example.com/llms.txt) and [`/openapi.json`](https://repocard.example.com/openapi.json).
+Plain HTTP agents can use [`/llms.txt`](https://repocard.xyz/llms.txt) and [`/openapi.json`](https://repocard.xyz/openapi.json).
 
 ## HTTP API
 
@@ -139,7 +139,7 @@ Plain HTTP agents can use [`/llms.txt`](https://repocard.example.com/llms.txt) a
 | `GET /api/v1/options` | All layouts, palettes, fonts, backgrounds and parameters. |
 | `POST /mcp` | MCP endpoint. |
 
-Card parameters: `variant` (1-4), `layout`, `palette`, `font`, `background`, `mark`, `emoji`, `accent`, `title`, `tagline`, `chips`, `stats=0`, `owner=0`, `mode=fast`. Full reference in the [docs](https://repocard.example.com/docs/#api).
+Card parameters: `variant` (1-4), `layout`, `palette`, `font`, `background`, `mark`, `emoji`, `accent`, `title`, `tagline`, `chips`, `stats=0`, `owner=0`, `mode=fast`. Full reference in the [docs](https://repocard.xyz/docs/#api).
 
 ## How it works
 
@@ -171,6 +171,8 @@ npx wrangler login
 npx wrangler secret put GITHUB_TOKEN    # fine-grained, public repositories, read-only
 npm run deploy                          # KV and rate limiters are provisioned on first deploy
 ```
+
+Before deploying your own copy, edit `wrangler.jsonc`: replace the `repocard.xyz` entries in `routes` with your domain (or remove `routes` and set `"workers_dev": true`), and set `PUBLIC_URL` to match.
 
 > **Plan requirement:** new renders need more than the Free plan's 10 ms of CPU per request, so use the **Workers Paid** plan. Use a **custom domain** in production: the Workers Cache API, which caches rendered images at the edge, isn't available on `*.workers.dev`.
 

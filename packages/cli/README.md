@@ -14,14 +14,14 @@ npx repocard apply your-username --yes    # upload in your own browser
 ```
 
 Requires Node.js 20+. Cards are rendered locally with the same engine as
-[the RepoCard website](https://repocard.example.com), so no server is needed.
+[the RepoCard website](https://repocard.xyz), so no server is needed.
 
 ## Designs
 
 - **Local, deterministic** (default): designs derived from the repo's language and metadata.
 - **Local, AI**: set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` to any OpenAI-compatible API
   (Groq, OpenRouter, Gemini, Together, Ollama).
-- **Server, AI**: `--endpoint https://repocard.example.com` (or `REPOCARD_URL`) to use
+- **Server, AI**: `--endpoint https://repocard.xyz` (or `REPOCARD_URL`) to use
   RepoCard's hosted designs.
 
 ## Uploading to GitHub

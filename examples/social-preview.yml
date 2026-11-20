@@ -20,4 +20,4 @@ jobs:
       - uses: nirholas/RepoCard@v1
         with:
           readme-banner: true
-          # endpoint: https://your-repocard.example.com   # AI-designed cards from your RepoCard server
+          # endpoint: https://your-repocard.xyz   # AI-designed cards from your RepoCard server

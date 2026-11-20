@@ -241,6 +241,7 @@ npm run deploy</code></pre>
           <tr><td><code>PUBLIC_URL</code></td><td>Variable</td><td>Canonical origin used in returned URLs. Defaults to the request origin.</td></tr>
         </tbody>
       </table></div>
+      <p>Before deploying your own copy, edit <code>wrangler.jsonc</code>: point <code>routes</code> at your domain (or remove them and set <code>"workers_dev": true</code>) and set <code>PUBLIC_URL</code> to match.</p>
       <p>Use a custom domain for production: the Workers Cache API, which caches rendered images, doesn't run on <code>*.workers.dev</code>.</p>
 
       <h2 id="privacy">Privacy &amp; security</h2>

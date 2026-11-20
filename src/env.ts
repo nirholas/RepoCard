@@ -35,7 +35,7 @@ export interface Env {
   /** API key for the OpenAI-compatible endpoint (secret). */
   LLM_API_KEY?: string;
   LLM_MODEL?: string;
-  /** Canonical public origin, e.g. https://repocard.example.com. Defaults to the request origin. */
+  /** Canonical public origin, e.g. https://repocard.xyz. Defaults to the request origin. */
   PUBLIC_URL?: string;
 }
 
