@@ -84,7 +84,70 @@ export class GitHubClient {
     return res;
   }
 
+  /**
+   * Repository data. With a token this is one GraphQL request (metadata,
+   * languages, topics and README together, on GraphQL's separate rate limit);
+   * otherwise, or if GraphQL fails, three REST requests.
+   */
   async getRepo(ref: RepoRef): Promise<RepoData> {
+    if (this.options.token) {
+      try {
+        const viaGraphql = await this.getRepoGraphql(ref);
+        if (viaGraphql) return viaGraphql;
+      } catch (err) {
+        if (err instanceof HttpError && err.status === 404) throw err;
+        // Rate limited or unavailable: fall back to REST below.
+      }
+    }
+    return this.getRepoRest(ref);
+  }
+
+  private async getRepoGraphql(ref: RepoRef): Promise<RepoData | null> {
+    let res: Response;
+    try {
+      res = await this.fetcher(`${API}/graphql`, {
+        method: 'POST',
+        headers: { ...(this.headers() as Record<string, string>), 'content-type': 'application/json' },
+        body: JSON.stringify({ query: REPO_QUERY, variables: { owner: ref.owner, name: ref.repo } }),
+      });
+    } catch {
+      return null;
+    }
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: { repository: GqlRepo | null }; errors?: { type?: string }[] };
+    if (body.errors?.some((e) => e.type === 'NOT_FOUND') || (body.data && body.data.repository === null)) {
+      throw notFound(`Repository ${ref.owner}/${ref.repo} was not found or is private.`);
+    }
+    const r = body.data?.repository;
+    if (!r || r.isPrivate) return null;
+    const total = r.languages?.totalSize ?? 0;
+    const languages = total
+      ? (r.languages?.edges ?? []).map((e) => ({ name: e.node.name, share: Math.round((e.size / total) * 1000) / 10 }))
+      : [];
+    const readme = [r.readme1, r.readme2, r.readme3, r.readme4].find((b) => b?.text)?.text ?? '';
+    return {
+      owner: r.owner.login,
+      name: r.name,
+      fullName: r.nameWithOwner,
+      description: (r.description ?? '').trim(),
+      stars: r.stargazerCount ?? 0,
+      forks: r.forkCount ?? 0,
+      openIssues: r.issues?.totalCount ?? 0,
+      language: r.primaryLanguage?.name ?? languages[0]?.name ?? null,
+      languages,
+      topics: (r.repositoryTopics?.nodes ?? []).map((n) => n.topic.name).slice(0, 20),
+      license: r.licenseInfo?.spdxId && r.licenseInfo.spdxId !== 'NOASSERTION' ? r.licenseInfo.spdxId : null,
+      homepage: r.homepageUrl || null,
+      ownerType: r.owner.__typename === 'Organization' ? 'Organization' : 'User',
+      avatarUrl: r.owner.avatarUrl,
+      archived: Boolean(r.isArchived),
+      fork: Boolean(r.isFork),
+      pushedAt: r.pushedAt ?? '',
+      readme: readmeToText(readme).slice(0, README_LIMIT),
+    };
+  }
+
+  private async getRepoRest(ref: RepoRef): Promise<RepoData> {
     const path = `/repos/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}`;
     const res = await this.request(path);
     if (res.status === 404) throw notFound(`Repository ${ref.owner}/${ref.repo} was not found or is private.`);
@@ -190,6 +253,45 @@ export function readmeToText(md: string): string {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+const REPO_QUERY = `query RepoCard($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    name nameWithOwner description stargazerCount forkCount isPrivate isArchived isFork pushedAt homepageUrl
+    issues(states: OPEN) { totalCount }
+    primaryLanguage { name }
+    languages(first: 6, orderBy: { field: SIZE, direction: DESC }) { totalSize edges { size node { name } } }
+    repositoryTopics(first: 20) { nodes { topic { name } } }
+    licenseInfo { spdxId }
+    owner { __typename login avatarUrl }
+    readme1: object(expression: "HEAD:README.md") { ... on Blob { text } }
+    readme2: object(expression: "HEAD:readme.md") { ... on Blob { text } }
+    readme3: object(expression: "HEAD:Readme.md") { ... on Blob { text } }
+    readme4: object(expression: "HEAD:README") { ... on Blob { text } }
+  }
+}`;
+
+interface GqlRepo {
+  name: string;
+  nameWithOwner: string;
+  description: string | null;
+  stargazerCount: number;
+  forkCount: number;
+  isPrivate: boolean;
+  isArchived: boolean;
+  isFork: boolean;
+  pushedAt: string | null;
+  homepageUrl: string | null;
+  issues?: { totalCount: number };
+  primaryLanguage: { name: string } | null;
+  languages?: { totalSize: number; edges: { size: number; node: { name: string } }[] };
+  repositoryTopics?: { nodes: { topic: { name: string } }[] };
+  licenseInfo: { spdxId: string | null } | null;
+  owner: { __typename: string; login: string; avatarUrl: string };
+  readme1?: { text?: string } | null;
+  readme2?: { text?: string } | null;
+  readme3?: { text?: string } | null;
+  readme4?: { text?: string } | null;
 }
 
 interface GitHubRepo {

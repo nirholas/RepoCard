@@ -181,6 +181,40 @@ describe('JSON API', () => {
   });
 });
 
+describe('GitHub client', () => {
+  const gql = {
+    name: 'widget-kit', nameWithOwner: 'octo/widget-kit', description: 'From GraphQL.', stargazerCount: 9, forkCount: 2,
+    isPrivate: false, isArchived: false, isFork: false, pushedAt: '2026-11-01T00:00:00Z', homepageUrl: '',
+    issues: { totalCount: 1 }, primaryLanguage: { name: 'TypeScript' },
+    languages: { totalSize: 100, edges: [{ size: 75, node: { name: 'TypeScript' } }, { size: 25, node: { name: 'CSS' } }] },
+    repositoryTopics: { nodes: [{ topic: { name: 'ui' } }] }, licenseInfo: { spdxId: 'MIT' },
+    owner: { __typename: 'Organization', login: 'octo', avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4' },
+    readme1: null, readme2: { text: '# Hi\n\nReadme body.' },
+  };
+
+  it('uses a single GraphQL request when a token is set', async () => {
+    const routes = githubRoutes();
+    routes['/graphql'] = () => Response.json({ data: { repository: gql } });
+    const fetcher = fakeFetch(routes);
+    const repo = await new GitHubClient({ token: 't', fetcher }).getRepo({ owner: 'octo', repo: 'widget-kit' });
+    expect(fetcher.calls).toEqual(['https://api.github.com/graphql']);
+    expect(repo).toMatchObject({ description: 'From GraphQL.', stars: 9, language: 'TypeScript', topics: ['ui'], license: 'MIT', ownerType: 'Organization' });
+    expect(repo.languages).toEqual([{ name: 'TypeScript', share: 75 }, { name: 'CSS', share: 25 }]);
+    expect(repo.readme).toContain('Readme body.');
+  });
+
+  it('maps GraphQL NOT_FOUND to 404 and falls back to REST on other failures', async () => {
+    const routes = githubRoutes();
+    routes['/graphql'] = () => Response.json({ data: { repository: null }, errors: [{ type: 'NOT_FOUND' }] });
+    await expect(new GitHubClient({ token: 't', fetcher: fakeFetch(routes) }).getRepo({ owner: 'octo', repo: 'x' })).rejects.toMatchObject({ status: 404 });
+    routes['/graphql'] = () => new Response('', { status: 403 });
+    const fetcher = fakeFetch(routes);
+    const repo = await new GitHubClient({ token: 't', fetcher }).getRepo({ owner: 'octo', repo: 'widget-kit' });
+    expect(repo.stars).toBe(1234);
+    expect(fetcher.calls.length).toBe(4);
+  });
+});
+
 describe('MCP', () => {
   it('initializes and negotiates the protocol version', async () => {
     const t = setup();
