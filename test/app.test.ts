@@ -181,6 +181,33 @@ describe('JSON API', () => {
   });
 });
 
+describe('discovery documents', () => {
+  it('serves robots.txt, sitemap.xml and llms-full.txt with absolute URLs', async () => {
+    const t = setup();
+    expect(await (await t.call('/robots.txt')).text()).toContain('Sitemap: https://repocard.test/sitemap.xml');
+    const sitemap = await (await t.call('/sitemap.xml')).text();
+    expect(sitemap).toContain('<loc>https://repocard.test/docs/</loc>');
+    const full = await (await t.call('/llms-full.txt')).text();
+    expect(full).toContain('create_social_preview');
+    expect(full).toContain('https://repocard.test/card/{owner}/{repo}.png');
+  });
+
+  it('serves .well-known documents', async () => {
+    const t = setup();
+    const sec = await (await t.call('/.well-known/security.txt')).text();
+    expect(sec).toMatch(/^Contact: https:\/\/github\.com\/nirholas\/RepoCard\/security\/advisories\/new$/m);
+    expect(sec).toMatch(/^Expires: \d{4}-\d{2}-\d{2}T00:00:00\.000Z$/m);
+    const card = (await (await t.call('/.well-known/mcp.json')).json()) as { remotes: { url: string }[]; tools: { name: string }[] };
+    expect(card.remotes[0]!.url).toBe('https://repocard.test/mcp');
+    expect(card.tools).toHaveLength(5);
+    const catalog = await t.call('/.well-known/api-catalog');
+    expect(catalog.headers.get('content-type')).toContain('application/linkset+json');
+    expect(((await catalog.json()) as { linkset: unknown[] }).linkset).toHaveLength(2);
+    const plugin = (await (await t.call('/.well-known/ai-plugin.json')).json()) as { api: { url: string } };
+    expect(plugin.api.url).toBe('https://repocard.test/openapi.json');
+  });
+});
+
 describe('GitHub client', () => {
   const gql = {
     name: 'widget-kit', nameWithOwner: 'octo/widget-kit', description: 'From GraphQL.', stargazerCount: 9, forkCount: 2,

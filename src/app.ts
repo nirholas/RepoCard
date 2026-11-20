@@ -5,7 +5,8 @@ import { HttpError, badRequest, notFound, rateLimited } from './lib/errors';
 import { CORS_HEADERS, SECURITY_HEADERS, clientIp, errorJson, json, readJson, text } from './lib/http';
 import { GitHubClient } from './lib/github';
 import { isValidOwner, isValidRepo, parseRepoRef, type RepoRef } from './lib/repo-ref';
-import { llmsTxt } from './llms';
+import { aiPluginManifest, apiCatalog, mcpServerCard, robotsTxt, securityTxt, sitemapXml } from './discovery';
+import { llmsFullTxt, llmsTxt } from './llms';
 import { handleMcp, type McpBackend } from './mcp';
 import { openApiDocument } from './openapi';
 import { CardService, parseCardQuery, type CacheLike, type CardInput, type Renderer } from './service';
@@ -195,6 +196,19 @@ export async function handle(request: Request, env: Env, ctx: ExecutionContextLi
 
     if (path === '/openapi.json') return json(openApiDocument(base), { cache: 'public, max-age=3600' });
     if (path === '/llms.txt') return text(llmsTxt(base), 'text/plain; charset=utf-8');
+    if (path === '/llms-full.txt') return text(llmsFullTxt(base), 'text/plain; charset=utf-8');
+    if (path === '/robots.txt') return text(robotsTxt(base), 'text/plain; charset=utf-8', 'public, max-age=86400');
+    if (path === '/sitemap.xml') return text(sitemapXml(base), 'application/xml; charset=utf-8', 'public, max-age=86400');
+    if (path === '/.well-known/security.txt') return text(securityTxt(base), 'text/plain; charset=utf-8', 'public, max-age=86400');
+    if (path === '/.well-known/mcp.json' || path === '/.well-known/mcp/server-card.json') {
+      return json(mcpServerCard(base), { cache: 'public, max-age=3600' });
+    }
+    if (path === '/.well-known/api-catalog') {
+      return new Response(JSON.stringify(apiCatalog(base), null, 2), {
+        headers: { 'content-type': 'application/linkset+json; charset=utf-8', 'cache-control': 'public, max-age=3600', ...CORS_HEADERS, ...SECURITY_HEADERS },
+      });
+    }
+    if (path === '/.well-known/ai-plugin.json') return json(aiPluginManifest(base), { cache: 'public, max-age=3600' });
 
     if (path.startsWith('/api/')) throw notFound(`No API route for ${method} ${path}.`);
 
