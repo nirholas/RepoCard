@@ -128,8 +128,8 @@ Vocabulary (choose only from these values):
 
 Rules:
 - The 4 concepts must use 4 different layouts. At least one must use a light palette and at least one a dark palette.
-- title: the repository name as people would write it (keep original spelling; you may fix casing or replace dashes with spaces only if the README does).
-- tagline: one plain, specific sentence (max 90 characters) saying what the project does. No hype words like "revolutionary", "blazing", "next-gen". No emoji.
+- title: the repository name exactly, e.g. "three.ws" stays "three.ws". You may only change letter case or turn dashes/underscores into spaces when the README writes it that way.
+- tagline: one specific phrase of 45-90 characters saying what the project does and for whom, reusing the project's own wording where possible. Not generic ("Create 3D AI agents" is too vague). No hype words like "revolutionary", "blazing", "next-gen". No emoji.
 - chips: up to 3 short lowercase keywords (max 16 characters each) a developer would search for.
 - accent: only if the project clearly has a brand color; otherwise omit.
 - rationale: one sentence explaining why this concept fits the project.
@@ -163,6 +163,15 @@ export function withTimeout<T>(promise: Promise<T>, ms: number, label = 'operati
 }
 
 /**
+ * Keep the model's title only if it is the repository name with nothing more
+ * than case changes or dashes/underscores turned into spaces.
+ */
+export function faithfulTitle(proposed: string, repoName: string): string {
+  const canonical = (t: string) => t.toLowerCase().replace(/[\s_-]+/g, '-');
+  return canonical(proposed) === canonical(repoName) ? proposed : repoName;
+}
+
+/**
  * Turn raw model output into exactly CONCEPT_COUNT valid, distinct concepts.
  * Missing or duplicate layouts are filled from the deterministic fallback.
  */
@@ -180,6 +189,7 @@ export function normalizeConcepts(raw: unknown, repo: RepoData): DesignSpec[] {
   for (const item of list) {
     if (out.length >= CONCEPT_COUNT) break;
     const spec = sanitizeSpec(item, base);
+    spec.title = faithfulTitle(spec.title, repo.name);
     if (seenLayouts.has(spec.layout)) continue;
     seenLayouts.add(spec.layout);
     out.push(spec);

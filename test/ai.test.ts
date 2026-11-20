@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aiDesigns, buildUserPrompt, normalizeConcepts, OpenAiCompatibleProvider, parseJsonish, withTimeout, WorkersAiProvider, type LlmProvider } from '../src/design/ai';
+import { aiDesigns, buildUserPrompt, faithfulTitle, normalizeConcepts, OpenAiCompatibleProvider, parseJsonish, withTimeout, WorkersAiProvider, type LlmProvider } from '../src/design/ai';
 import { repoFixture } from './fixtures';
 
 const good = {
@@ -33,6 +33,20 @@ describe('normalizeConcepts', () => {
     expect(normalizeConcepts('lol', repoFixture())).toHaveLength(4);
     expect(normalizeConcepts({ concepts: 'x' }, repoFixture())).toHaveLength(4);
     expect(normalizeConcepts([good.concepts[1]], repoFixture())[0]!.layout).toBe('editorial');
+  });
+});
+
+describe('faithfulTitle', () => {
+  it('allows only case and separator changes to the repository name', () => {
+    expect(faithfulTitle('Three Ws', 'three.ws')).toBe('three.ws');
+    expect(faithfulTitle('Next.js', 'next.js')).toBe('Next.js');
+    expect(faithfulTitle('Widget Kit', 'widget-kit')).toBe('Widget Kit');
+    expect(faithfulTitle('Totally Different', 'widget-kit')).toBe('widget-kit');
+  });
+
+  it('is applied to model output', () => {
+    const out = normalizeConcepts({ concepts: [{ ...good.concepts[0], title: 'Widget Kit Pro' }] }, repoFixture());
+    expect(out[0]!.title).toBe('widget-kit');
   });
 });
 
