@@ -22,7 +22,11 @@
   <a href="https://www.npmjs.com/package/repocard"><img alt="npm" src="https://img.shields.io/npm/v/repocard?color=c084fc"></a>
   <img alt="Cloudflare Workers" src="https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-f38020">
   <img alt="MCP" src="https://img.shields.io/badge/MCP-ready-ff8cc6">
+  <a href="https://repocard.xyz"><img alt="Website" src="https://img.shields.io/badge/try%20it-repocard.xyz-8ea6ff"></a>
+  <a href="https://github.com/nirholas/RepoCard/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/nirholas/RepoCard?style=social"></a>
 </p>
+
+<p align="center"><sub>If RepoCard gives your repo a better first impression, please <a href="https://github.com/nirholas/RepoCard">⭐ star it</a>. It helps other developers find it.</sub></p>
 
 ---
 
@@ -34,6 +38,20 @@ The **social preview** is the image people see when your repository link is shar
 - **Every repo, not just one.** Bulk export for a whole account, a CLI that can upload to every repo, and a GitHub Action that keeps cards fresh.
 - **Agent-native.** MCP server, OpenAPI spec and `llms.txt`, so AI agents can design and explain setup for you.
 - **Runs on Cloudflare.** One Worker with Workers AI, KV and static assets. MIT licensed and self-hostable.
+
+## Why RepoCard
+
+| | GitHub default | Template generators | **RepoCard** |
+|---|---|---|---|
+| Design fits the project | No | Same layout for every repo | **Yes, art-directed from your README** |
+| Choices per repo | 1 | 1 template | **4 concepts + fine-tuning** |
+| Tagline | Raw description | Raw description | **Written for the card** |
+| Contrast and legibility checks | n/a | No | **WCAG-checked palettes** |
+| Whole account at once | No | No | **Bulk export, CLI upload, Action** |
+| AI agents | No | No | **MCP server, OpenAPI, llms.txt** |
+| Self-hostable | No | Varies | **Yes, one Cloudflare Worker (MIT)** |
+
+**Use cases:** launching a project on Hacker News, X or Product Hunt; giving an organization's repos a consistent look; README header banners; letting your coding agent ship a preview with every new repo.
 
 ## Quick start
 
@@ -210,7 +228,7 @@ action.yml    the GitHub Action
 test/         Vitest suites
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SUPPORT.md](SUPPORT.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md). Coding agents: start with [AGENTS.md](AGENTS.md) and [llms.txt](llms.txt).
 
 ## FAQ
 
@@ -219,6 +237,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SE
 **Which model designs the cards?** An open model on Cloudflare Workers AI by default; any OpenAI-compatible endpoint when self-hosting. If the model fails, RepoCard falls back to deterministic designs, so you always get a card.
 
 **Why does X/LinkedIn still show the old image?** Platforms cache link previews for days. Most have a tool to refresh a URL.
+
+## Star and share
+
+If RepoCard helped, a ⭐ on [GitHub](https://github.com/nirholas/RepoCard) means a lot. Share it:
+[X](https://x.com/intent/post?text=AI-designed%20social%20preview%20images%20for%20GitHub%20repos&url=https%3A%2F%2Frepocard.xyz) ·
+[LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Frepocard.xyz) ·
+[Reddit](https://www.reddit.com/submit?url=https%3A%2F%2Frepocard.xyz&title=RepoCard%3A%20AI-designed%20social%20previews%20for%20GitHub%20repos) ·
+[Hacker News](https://news.ycombinator.com/submitlink?u=https%3A%2F%2Frepocard.xyz&t=RepoCard%3A%20AI-designed%20social%20previews%20for%20GitHub%20repos)
 
 ## License
 
